@@ -1,8 +1,18 @@
-import { MyLibrary } from './MyLibrary';
+import { DirectionInterface, PlayerControllerInterface} from './types/raid-types'
 
-console.log('See this in your browser console: Typescript Webpack Starter Launched');
+declare const Direction: DirectionInterface
 
-const myLibrary = new MyLibrary();
-const result = myLibrary.executeDependency();
+function RaidPlayer(playerController: PlayerControllerInterface) {
+  this.pc = playerController;
+}
 
-console.log(`A random number ${result}`);
+RaidPlayer.prototype = {
+  act: function() {
+    const direction = Direction.randomDirection()
+    if (this.pc.canMove(direction)) {
+      this.pc.move(direction);
+      return;
+    }
+  }
+};
+

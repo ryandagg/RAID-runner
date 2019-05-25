@@ -1,5 +1,8 @@
 const webpack = require('webpack');
 const path = require('path');
+const WriteFilePlugin = require('write-file-webpack-plugin');
+
+
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
 
@@ -16,7 +19,10 @@ const plugins = [
         failOnHint: true
       }
     }
-  })
+  }),
+  new WriteFilePlugin({
+    test: /.ts|.js/
+  }),
 ];
 
 var config = {
@@ -58,7 +64,7 @@ var config = {
   devServer: {
     contentBase: path.join(__dirname, 'dist/'),
     compress: true,
-    port: 3000,
+    port: 6000,
     hot: true
   }
 };
