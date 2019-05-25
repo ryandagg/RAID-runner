@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-const WriteFilePlugin = require('write-file-webpack-plugin');
 
 
 const nodeEnv = process.env.NODE_ENV || 'development';
@@ -15,16 +14,15 @@ const plugins = [
   new webpack.LoaderOptionsPlugin({
     options: {
       tslint: {
-        emitErrors: true,
-        failOnHint: true
+        emitErrors: false,
+        failOnHint: false,
       }
     }
   }),
-  new WriteFilePlugin({
-    test: /.ts|.js/
-  }),
 ];
 
+const sourcePaht = path.join(__dirname, 'src')
+console.log('sourcePaht: ', sourcePaht)
 var config = {
   devtool: isProd ? 'hidden-source-map' : 'source-map',
   context: path.resolve('./src'),
@@ -58,7 +56,10 @@ var config = {
     ].filter(Boolean)
   },
   resolve: {
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js'],
+    alias: {
+      src: path.resolve(__dirname, 'src/'),
+    },
   },
   plugins: plugins,
   devServer: {

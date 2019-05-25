@@ -1,2 +1,3 @@
-export { DirectionInterface} from './Direction'
-export { PlayerControllerInterface } from './PlayerController'
+export { DirectionI} from './Direction'
+export { PlayerControllerI } from './PlayerController'
+export { UnitInfoI } from './UnitInfo'
