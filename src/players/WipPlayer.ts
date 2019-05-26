@@ -1,5 +1,7 @@
-import {DirectionI, PlayerControllerI, UnitInfoI} from 'src/types/raid-types'
-import { MapLocationI } from 'src/types/raid-types/MapLocation'
+import {DirectionI, PlayerControllerI, UnitInfoI, MapLocationI} from 'src/types/raid-types/RaidTypes'
+import { getPlayerContoller, inPathToStart } from 'src/lib/state/getters'
+import { addToPathStart, setPlayerController } from 'src/lib/state/setters'
+import {setState} from 'src/lib/state/state'
 
 declare const Direction: DirectionI
 
@@ -8,72 +10,75 @@ interface RaidPlayerInterface {
 }
 
 export class WipPlayer implements RaidPlayerInterface {
-  private pc: PlayerControllerI
-  private tail: MapLocationI[]
-  private tailIDX: number
+  private readonly pc: PlayerControllerI
 
-  constuctor(playerController: PlayerControllerI) {
+  constructor(playerController: PlayerControllerI) {
+    // playerController is mutated by RAID, so we pretty much need to deal with this here.
+    // we need to call setState on playerController at the beginning of very act() call.
     this.pc = playerController
-    const loc = this.pc.getCurrentLocation()
-    this.tail = [loc, loc, loc, loc]
-    this.tailIDX = 0
+    setState((state) => {
+      state.playerController = playerController
+      state.map = []
+      state.pathToStart = []
+    })
   }
 
   act() {
-    let i, e
-    const ourLoc = this.pc.getCurrentLocation()
-    const enemies = this.pc.senseNearbyUnits()
+    setPlayerController(this.pc)
+    const pc = getPlayerContoller()
+    const ourLoc = pc.getCurrentLocation()
+    const enemies = pc.senseNearbyUnits()
 
-    const spawners = enemies.filter(function (e: UnitInfoI) {
-      return e.spawnedUnitType
+    const spawners = enemies.filter(function (enemy: UnitInfoI) {
+      return enemy.spawnedUnitType
     })
 
     // handle spawners
-    for (i = 0; i < spawners.length; i++) {
-      e = spawners[i];
-      if (e.hp > 1) {
-        if (this.pc.canRangedAttack(e.location)) {
-          this.pc.rangedAttack(e.location);
+    for (let i = 0; i < spawners.length; i++) {
+      let enemy = spawners[i];
+      if (enemy.hp > 1) {
+        if (pc.canRangedAttack(enemy.location)) {
+          pc.rangedAttack(enemy.location);
           return;
         }
       }
     }
 
     // melee range next
-    for (i = 0; i < enemies.length; i++) {
-      e = enemies[i]
-      if (e.location.isAdjacentTo(ourLoc) && e.hp > 1) {
-        if (this.pc.canMeleeAttack(e.location)) {
-          this.pc.meleeAttack(e.location)
+    for (let i = 0; i < enemies.length; i++) {
+      let enemy = enemies[i]
+      if (enemy.location.isAdjacentTo(ourLoc) && enemy.hp > 1) {
+        if (pc.canMeleeAttack(enemy.location)) {
+          pc.meleeAttack(enemy.location)
           return
         }
       }
     }
 
-    for (i = 0; i < enemies.length; i++) {
-      e = enemies[i];
-      if (this.pc.canMagicAttack(e.location)) {
-        this.pc.magicAttack(e.location)
+    for (let i = 0; i < enemies.length; i++) {
+      let enemy = enemies[i];
+      if (pc.canMagicAttack(enemy.location)) {
+        pc.magicAttack(enemy.location)
         return
       }
     }
 
-    for (i = 0; i < enemies.length; i++) {
-      e = enemies[i]
-      if (e.hp > 1) {
-        if (this.pc.canRangedAttack(e.location)) {
-          this.pc.rangedAttack(e.location);
+    for (let i = 0; i < enemies.length; i++) {
+      let enemy = enemies[i]
+      if (enemy.hp > 1) {
+        if (pc.canRangedAttack(enemy.location)) {
+          pc.rangedAttack(enemy.location);
           return;
         }
       }
     }
 
-    if (this.pc.getDelay() > 1) {
+    if (pc.getDelay() > 1) {
       return
     }
 
     // run to exit
-    let toMove = this.pc.senseDirectionToExit()
+    let toMove = pc.senseDirectionToExit()
     if (enemies.length > 0) {
       toMove = ourLoc.directionTo(enemies[0].location)
     }
@@ -81,8 +86,8 @@ export class WipPlayer implements RaidPlayerInterface {
     let idx = 0
     let done = false
     while (!done) {
-      done = this.pc.canMove(toMove)
-      done = done && !this.inTail(ourLoc.add(toMove))
+      done = pc.canMove(toMove)
+      done = done && !inPathToStart(ourLoc.add(toMove))
 
       idx += 1
       if (idx > 10) {
@@ -94,35 +99,23 @@ export class WipPlayer implements RaidPlayerInterface {
       }
     }
 
-    if (this.pc.canMove(toMove)) {
-      this.addToTail(ourLoc.add(toMove))
-      this.pc.move(toMove)
+    if (pc.canMove(toMove)) {
+      addToPathStart(ourLoc.add(toMove))
+      pc.move(toMove)
     }
 
-    if (this.pc.getDelay() > 1) {
+    if (pc.getDelay() > 1) {
       return
     }
 
     idx = 0
-    while (this.pc.getDelay() < 1 && idx < 16) {
+    while (pc.getDelay() < 1 && idx < 16) {
       idx++
       const d = Direction.randomDirection()
-      if (this.pc.canMove(d)) {
-        this.pc.move(d)
+      if (pc.canMove(d)) {
+        pc.move(d)
       }
     }
-  }
-  addToTail(loc: MapLocationI) {
-    this.tail[this.tailIDX] = loc
-    this.tailIDX += 1
-    this.tailIDX = this.tailIDX % this.tail.length
-  }
-  inTail(loc: MapLocationI) {
-    return this.tail.filter(
-      function (l: MapLocationI) {
-        return l.equals(loc)
-      }
-    ).length > 0
   }
 }
 

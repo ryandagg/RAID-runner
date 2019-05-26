@@ -1,4 +1,4 @@
-import {DirectionI, PlayerControllerI, UnitInfoI} from 'src/types/raid-types'
+import {DirectionI, PlayerControllerI, UnitInfoI} from 'src/types/raid-types/RaidTypes'
 import { MapLocationI } from 'src/types/raid-types/MapLocation'
 
 declare const Direction: DirectionI

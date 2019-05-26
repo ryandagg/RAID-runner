@@ -5,4 +5,6 @@ export interface MapLocationI {
   directionTo: (l: MapLocationI) => DirectionI
   isAdjacentTo: (l: MapLocationI) => boolean
   equals: (l: MapLocationI) => boolean
+  x: number
+  y: number
 }

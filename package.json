@@ -74,5 +74,9 @@
   "_resolved": "https://registry.npmjs.org/@nobrainr/typescript_universal-webpack-karma_jasmine/-/typescript_universal-webpack-karma_jasmine-1.0.0.tgz",
   "_shasum": "1c7e50d285c3427fd7ddb716147fc558b3d55754",
   "_spec": "@nobrainr/typescript_universal-webpack-karma_jasmine@^1.0.0",
-  "_where": "/Users/ryandagg/.nvm/versions/node/v10.15.3/lib/node_modules/create-ts-lib"
+  "_where": "/Users/ryandagg/.nvm/versions/node/v10.15.3/lib/node_modules/create-ts-lib",
+  "dependencies": {
+    "immer": "^3.1.2",
+    "ramda": "^0.26.1"
+  }
 }
