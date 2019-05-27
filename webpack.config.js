@@ -21,8 +21,6 @@ const plugins = [
   }),
 ];
 
-const sourcePaht = path.join(__dirname, 'src')
-console.log('sourcePaht: ', sourcePaht)
 var config = {
   devtool: isProd ? 'hidden-source-map' : 'source-map',
   context: path.resolve('./src'),

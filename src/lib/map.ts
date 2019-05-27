@@ -1,8 +1,9 @@
-import {getState, setState} from 'src/lib/state/state'
+import {getState} from 'src/lib/state/state'
 import {clone} from 'ramda'
-import { getMapMaxX, getMapMaxY, getPlayerInfo } from 'src/lib/state/getters'
+import { getPlayerInfo } from 'src/lib/state/getters'
 import { MapTileI, TileI } from 'src/types/raid-types/MapLocation'
 import { setMap } from 'src/lib/state/setters'
+import {transpose2dArrays} from 'src/lib/utils'
 
 
 export const isPlayerLocation = (loc: TileI) => {
@@ -10,54 +11,73 @@ export const isPlayerLocation = (loc: TileI) => {
   return loc.x === location.x && loc.y === location.y
 }
 
-// todo: this is fucked and I don't see how
-const expandMap = (map: MapTileI[][], maxX: number, maxY: number): MapTileI[][] => {
-  let newMap = clone(map)
-  for (let y = 0; y <= maxY; y++) {
-    const row = map[y] || []
-    for (let x = 0; x <= maxX; x++) {
-      const tile = row[y] || {x, y, passable: true}
-      row.push(tile)
-    }
-    newMap.push(row)
-  }
-  return newMap
+const drawMap = (map: MapTileI[][]) => {
+  const visualMap: MapTileI[][] = transpose2dArrays(map)
+  let result = ''
+  visualMap.forEach((row, rowIdx) => {
+    row.forEach((cell, columnIdx) => {
+      if (isPlayerLocation({x: rowIdx, y: columnIdx})) {
+        result += '@'
+      } else if (cell.enemy) {
+        result += 'X'
+      } else if (!cell.sensed) {
+        result += '?'
+      } else if (!cell.passable) {
+        result += '#'
+      } else {
+        result += ' '
+      }
+    })
+    result += '\n'
+  })
+  console.log(map)
+  console.log(result)
+  return result
 }
 
 // row is y, column is x
 export const updateMap = () => {
   const {map, playerController} = getState()
-  console.log('oldMap: ', map)
   const player = getPlayerInfo()
   const {location, sensorRadiusSquared} = player
   const visionMax = Math.sqrt(sensorRadiusSquared)
+  const rowLength = map.length
+  const columnLength = (map[0] || []).length
+  const maxX = Math.max(columnLength, visionMax + location.x + 1)
+  const maxY = Math.max(rowLength, visionMax + location.y + 1)
+
   let newMap = clone(map) as MapTileI[][]
-  const maxX = Math.max(getMapMaxX(), visionMax + location.x + 1)
-  const maxY = Math.max(getMapMaxY(), visionMax + location.y + 1)
-  const minX = maxX - visionMax - 1
-  const minY = maxY - visionMax - 1
+  console.log('oldMap: ')
+  drawMap(newMap)
 
-  if (maxX > getMapMaxX() || maxY > getMapMaxY()) {
-    newMap = expandMap(newMap, maxX, maxY)
-  }
+  for (let rowIdx = 0; rowIdx < maxY; rowIdx++) {
 
-  for (let y = minY; y <= maxY; y++) {
-    const row = newMap[y] || []
-    for (let x = minX; x <= maxX; x++) {
-      if (playerController.canSense({x, y})) {
-        const tile = row[y] || {x, y, passable: true}
-        tile.passable = playerController.senseIfPassable({x, y})
-        if (!isPlayerLocation({x, y})) {
-          tile.enemy = playerController.senseUnitAtLocation({x, y})
+    const row = newMap[rowIdx] || []
+    for (let columnIdx = 0; columnIdx < maxX; columnIdx++) {
+
+      const coordinates = {y: rowIdx, x: columnIdx}
+      const tile = row[columnIdx] || {...coordinates, passable: false, sensed: false}
+      if (playerController.canSense(coordinates)) {
+        tile.sensed = true
+        tile.passable = playerController.senseIfPassable(coordinates)
+        if (!isPlayerLocation(coordinates)) {
+          tile.enemy = playerController.senseUnitAtLocation(coordinates)
         } else {
           tile.enemy = undefined
         }
-        row[y] = tile
       }
+      row[columnIdx] = tile
     }
-    newMap[y] = row
+    newMap[rowIdx] = row
   }
 
-  console.log('newMap: ', newMap)
+  console.log('newMap: ')
+  drawMap(newMap)
+
+  const wrongLength = newMap.find(row => row.length !== newMap[0].length)
+  if (wrongLength) {
+    console.log('wrongLength: ', wrongLength)
+    throw new Error(' expandMap is fucked')
+  }
   setMap(newMap)
 }

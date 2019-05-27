@@ -1,4 +1,4 @@
-import {DirectionI, PlayerControllerI, UnitInfoI, MapLocationI} from 'src/types/raid-types/RaidTypes'
+import {DirectionI, PlayerControllerI, UnitInfoI} from 'src/types/raid-types/RaidTypes'
 import { getPlayerController, inPathToStart } from 'src/lib/state/getters'
 import { addToPathStart, setPlayerController } from 'src/lib/state/setters'
 import {setState} from 'src/lib/state/state'
@@ -19,7 +19,7 @@ export class WipPlayer implements RaidPlayerInterface {
     this.pc = playerController
     setState((state) => {
       state.playerController = playerController
-      state.map = [[]]
+      state.map = []
       state.pathToStart = []
     })
   }

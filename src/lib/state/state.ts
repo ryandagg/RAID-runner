@@ -1,5 +1,7 @@
 import { PlayerStateI } from 'src/types/PlayerState'
-import produce, {Draft} from 'immer'
+import produce, {Draft, setAutoFreeze} from 'immer'
+
+setAutoFreeze(true)
 
 let state: PlayerStateI
 

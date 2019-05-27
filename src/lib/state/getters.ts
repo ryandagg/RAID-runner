@@ -11,6 +11,6 @@ export const getMap = () => getState().map
 
 // row is y, column is x
 export const getMapMaxX = () => getMap().length
-export const getMapMaxY = () => getMap()[0].length
+export const getMapMaxY = () => (getMap()[0] || []).length
 
 export const getPlayerInfo = () => getPlayerController().getMyInfo()
