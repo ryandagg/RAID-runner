@@ -4,13 +4,14 @@ import { PlayerControllerI } from 'src/types/raid-types/RaidTypes'
 
 export const addToPathStart = (loc: MapLocationI): void => {
   setState((state) => {
+    // @ts-ignore // this should be working and is everywhere else...
     state.pathToStart.push(loc)
   })
 }
 
 export const setPlayerController = (playerController: PlayerControllerI): void => {
-  setState((draft) => {
-    draft.playerController = playerController
+  setState((state) => {
+    state.playerController = playerController
   })
 }
 

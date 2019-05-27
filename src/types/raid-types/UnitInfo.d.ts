@@ -8,4 +8,10 @@ export interface UnitInfoI {
   hp: number
   healPower: number
   maxHp: number
+  meleeAttackPower: number
+  meleeAttackDelay: number
+  magicAttackPower: number
+  magicAttackDelay: number
+  rangedAttackPower: number
+  rangedAttackDelay: number
 }

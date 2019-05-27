@@ -12,11 +12,11 @@ export const isPlayerLocation = (loc: TileI) => {
 }
 
 const drawMap = (map: MapTileI[][]) => {
-  const visualMap: MapTileI[][] = transpose2dArrays(map)
   let result = ''
-  visualMap.forEach((row, rowIdx) => {
-    row.forEach((cell, columnIdx) => {
-      if (isPlayerLocation({x: rowIdx, y: columnIdx})) {
+  const {location} = getPlayerInfo()
+  map.forEach((row) => {
+    row.reverse().forEach((cell) => {
+      if (cell.x === location.x && cell.y === location.y) {
         result += '@'
       } else if (cell.enemy) {
         result += 'X'
@@ -57,6 +57,8 @@ export const updateMap = () => {
 
       const coordinates = {y: rowIdx, x: columnIdx}
       const tile = row[columnIdx] || {...coordinates, passable: false, sensed: false}
+      // delete tile.enemy // remove enemy because it might have moved
+
       if (playerController.canSense(coordinates)) {
         tile.sensed = true
         tile.passable = playerController.senseIfPassable(coordinates)
@@ -74,10 +76,10 @@ export const updateMap = () => {
   console.log('newMap: ')
   drawMap(newMap)
 
-  const wrongLength = newMap.find(row => row.length !== newMap[0].length)
-  if (wrongLength) {
-    console.log('wrongLength: ', wrongLength)
-    throw new Error(' expandMap is fucked')
-  }
+  // const wrongLength = newMap.find(row => row.length !== newMap[0].length)
+  // if (wrongLength) {
+  //   console.log('wrongLength: ', wrongLength)
+  //   throw new Error(' expandMap is fucked')
+  // }
   setMap(newMap)
 }

@@ -3,6 +3,7 @@ import { getPlayerController, inPathToStart } from 'src/lib/state/getters'
 import { addToPathStart, setPlayerController } from 'src/lib/state/setters'
 import {setState} from 'src/lib/state/state'
 import { updateMap } from 'src/lib/map'
+import { getBestAttack } from 'src/lib/attackSelector'
 
 declare const Direction: DirectionI
 
@@ -25,6 +26,17 @@ export class WipPlayer implements RaidPlayerInterface {
   }
 
   act() {
+    /***
+     * TODO:
+     * attack based on max damage calculation
+     * left/right hand rule to minimize enemy exposure
+     * notate defensible positions to retreat to
+     * chase spawners and then retreat to last wall for main navigation pathing
+     * run to exit after/before all enemies killed?
+     * handle alerted monsters outside of ranged attack range
+     * determine when to avoid alerting a monster
+     ***/
+
     // update pc to immutable state
     setPlayerController(this.pc)
     updateMap()
@@ -33,48 +45,10 @@ export class WipPlayer implements RaidPlayerInterface {
     const enemies = pc.senseNearbyUnits()
     const player = pc.getMyInfo()
 
-    const spawners = enemies.filter(function (enemy: UnitInfoI) {
-      return enemy.spawnedUnitType
-    })
-
-    // handle spawners
-    for (let i = 0; i < spawners.length; i++) {
-      let enemy = spawners[i];
-      if (enemy.hp > 1) {
-        if (pc.canRangedAttack(enemy.location)) {
-          pc.rangedAttack(enemy.location);
-          return;
-        }
-      }
-    }
-
-    // melee range next
-    for (let i = 0; i < enemies.length; i++) {
-      let enemy = enemies[i]
-      if (enemy.location.isAdjacentTo(ourLoc) && enemy.hp > 1) {
-        if (pc.canMeleeAttack(enemy.location)) {
-          pc.meleeAttack(enemy.location)
-          return
-        }
-      }
-    }
-
-    for (let i = 0; i < enemies.length; i++) {
-      let enemy = enemies[i];
-      if (pc.canMagicAttack(enemy.location)) {
-        pc.magicAttack(enemy.location)
-        return
-      }
-    }
-
-    for (let i = 0; i < enemies.length; i++) {
-      let enemy = enemies[i]
-      if (enemy.hp > 1) {
-        if (pc.canRangedAttack(enemy.location)) {
-          pc.rangedAttack(enemy.location);
-          return;
-        }
-      }
+   const possibleAttack = getBestAttack()
+    if (possibleAttack) {
+      possibleAttack.attackFunc.bind(pc)(possibleAttack.location)
+      return
     }
 
     if (pc.getDelay() > 1) {
@@ -83,9 +57,11 @@ export class WipPlayer implements RaidPlayerInterface {
 
     // heal
     if ((player.maxHp - player.hp) > (player.healPower / 2)) {
-      // todo: consider getGameRound vs getGameRoundLimit
+      // todo: consider getGameRound vs getGameRoundLimit and if worth doing when enemies visible
       pc.heal()
     }
+
+
 
     // run to exit
     let toMove = pc.senseDirectionToExit()
