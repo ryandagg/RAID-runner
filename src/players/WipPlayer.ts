@@ -1,7 +1,8 @@
 import {DirectionI, PlayerControllerI, UnitInfoI, MapLocationI} from 'src/types/raid-types/RaidTypes'
-import { getPlayerContoller, inPathToStart } from 'src/lib/state/getters'
+import { getPlayerController, inPathToStart } from 'src/lib/state/getters'
 import { addToPathStart, setPlayerController } from 'src/lib/state/setters'
 import {setState} from 'src/lib/state/state'
+import { updateMap } from 'src/lib/map'
 
 declare const Direction: DirectionI
 
@@ -18,16 +19,19 @@ export class WipPlayer implements RaidPlayerInterface {
     this.pc = playerController
     setState((state) => {
       state.playerController = playerController
-      state.map = []
+      state.map = [[]]
       state.pathToStart = []
     })
   }
 
   act() {
+    // update pc to immutable state
     setPlayerController(this.pc)
-    const pc = getPlayerContoller()
+    updateMap()
+    const pc = getPlayerController()
     const ourLoc = pc.getCurrentLocation()
     const enemies = pc.senseNearbyUnits()
+    const player = pc.getMyInfo()
 
     const spawners = enemies.filter(function (enemy: UnitInfoI) {
       return enemy.spawnedUnitType
@@ -75,6 +79,12 @@ export class WipPlayer implements RaidPlayerInterface {
 
     if (pc.getDelay() > 1) {
       return
+    }
+
+    // heal
+    if ((player.maxHp - player.hp) > (player.healPower / 2)) {
+      // todo: consider getGameRound vs getGameRoundLimit
+      pc.heal()
     }
 
     // run to exit

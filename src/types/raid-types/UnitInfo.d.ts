@@ -1,8 +1,11 @@
-import { DirectionI } from 'src/types/raid-types/Direction'
 import { MapLocationI } from 'src/types/raid-types/MapLocation'
 
 export interface UnitInfoI {
-  spawnedUnitType: string;
+  /*** QUERIES ***/
+  spawnedUnitType: string
   location: MapLocationI
+  sensorRadiusSquared: number
   hp: number
+  healPower: number
+  maxHp: number
 }
