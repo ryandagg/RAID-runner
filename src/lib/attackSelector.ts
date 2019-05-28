@@ -1,7 +1,7 @@
 import { getState } from 'src/lib/state/state'
 import {path} from 'ramda'
 import { GameConstantsI, MapLocationI, UnitInfoI } from 'src/types/raid-types/RaidTypes'
-import { MapType } from 'src/types/PlayerState'
+import { MapT } from 'src/types/PlayerState'
 
 declare const GameConstants: GameConstantsI
 
@@ -18,7 +18,7 @@ interface Modifiers {
 }
 
 interface MagicProps extends Modifiers {
-  map: MapType
+  map: MapT
 }
 
 const KILL_MULTIPLIER = 2

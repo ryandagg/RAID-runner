@@ -17,4 +17,5 @@ export interface MapLocationI extends TileI {
   directionTo: (l: MapLocationI) => DirectionI
   isAdjacentTo: (l: MapLocationI) => boolean
   equals: (l: MapLocationI) => boolean
+  followedPathFinding?: boolean
 }

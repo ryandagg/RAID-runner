@@ -1,7 +1,7 @@
 import { MapLocationI } from 'src/types/raid-types/MapLocation'
 import {getState} from 'src/lib/state/state'
 
-export const inPathToStart = (loc: MapLocationI): boolean =>  getState().pathToStart
+export const inMovementHistory = (loc: MapLocationI): boolean =>  getState().movementHistory
   .filter((l: MapLocationI) =>  l.equals(loc))
   .length > 0
 

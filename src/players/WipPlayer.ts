@@ -1,9 +1,10 @@
 import {DirectionI, PlayerControllerI, UnitInfoI} from 'src/types/raid-types/RaidTypes'
-import { getPlayerController, inPathToStart } from 'src/lib/state/getters'
-import { addToPathStart, setPlayerController } from 'src/lib/state/setters'
-import {setState} from 'src/lib/state/state'
+import { getPlayerController, inMovementHistory } from 'src/lib/state/getters'
+import { addToMovementHistory, setPlayerController } from 'src/lib/state/setters'
+import { getState, setState } from 'src/lib/state/state'
 import { updateMap } from 'src/lib/map'
 import { getBestAttack } from 'src/lib/attackSelector'
+import { selectMove } from 'src/lib/movement'
 
 declare const Direction: DirectionI
 
@@ -21,7 +22,7 @@ export class WipPlayer implements RaidPlayerInterface {
     setState((state) => {
       state.playerController = playerController
       state.map = []
-      state.pathToStart = []
+      state.movementHistory = []
     })
   }
 
@@ -44,6 +45,9 @@ export class WipPlayer implements RaidPlayerInterface {
     const ourLoc = pc.getCurrentLocation()
     const enemies = pc.senseNearbyUnits()
     const player = pc.getMyInfo()
+    const {movementHistory} = getState()
+    // seed movementHistory with initial location
+    if (!movementHistory.length) addToMovementHistory(player.location)
 
    const possibleAttack = getBestAttack()
     if (possibleAttack) {
@@ -61,7 +65,10 @@ export class WipPlayer implements RaidPlayerInterface {
       pc.heal()
     }
 
-
+    const didMove = selectMove()
+    if (didMove) {
+      return
+    }
 
     // run to exit
     let toMove = pc.senseDirectionToExit()
@@ -73,7 +80,7 @@ export class WipPlayer implements RaidPlayerInterface {
     let done = false
     while (!done) {
       done = pc.canMove(toMove)
-      done = done && !inPathToStart(ourLoc.add(toMove))
+      done = done && !inMovementHistory(ourLoc.add(toMove))
 
       idx += 1
       if (idx > 10) {
@@ -86,7 +93,7 @@ export class WipPlayer implements RaidPlayerInterface {
     }
 
     if (pc.canMove(toMove)) {
-      addToPathStart(ourLoc.add(toMove))
+      addToMovementHistory(ourLoc.add(toMove))
       pc.move(toMove)
     }
 

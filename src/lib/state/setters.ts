@@ -2,10 +2,10 @@ import { MapLocationI, MapTileI } from 'src/types/raid-types/MapLocation'
 import { setState } from 'src/lib/state/state'
 import { PlayerControllerI } from 'src/types/raid-types/RaidTypes'
 
-export const addToPathStart = (loc: MapLocationI): void => {
+export const addToMovementHistory = (loc: MapLocationI): void => {
   setState((state) => {
     // @ts-ignore // this should be working and is everywhere else...
-    state.pathToStart.push(loc)
+    state.movementHistory.push(loc)
   })
 }
 

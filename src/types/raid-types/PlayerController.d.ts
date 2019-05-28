@@ -1,6 +1,7 @@
 import { DirectionI } from './Direction'
 import { UnitInfoI } from 'src/types/raid-types/UnitInfo'
-import { MapLocationI, TileI } from 'src/types/raid-types/MapLocation'
+import { MapLocationI, MapTileI, TileI } from 'src/types/raid-types/MapLocation'
+import { MapT } from 'src/types/PlayerState'
 
 export interface PlayerControllerI {
   /*** QUERIES ***/
@@ -15,8 +16,8 @@ export interface PlayerControllerI {
   canSense: (l: TileI) => boolean
 
   // path finding
-  findPath: (map: MapLocationI[][], start: MapLocationI, end: MapLocationI) => DirectionI[]
-  nextDirTo: (map: MapLocationI[][], start: MapLocationI, end: MapLocationI) => DirectionI | null
+  findPath: (map: MapT, start: MapLocationI, end: MapLocationI) => DirectionI[]
+  nextDirTo: (map: MapT, start: MapLocationI, end: MapLocationI) => DirectionI | null
 
   // combat
   canRangedAttack: (d: MapLocationI) => boolean

@@ -3,7 +3,6 @@ import {clone} from 'ramda'
 import { getPlayerInfo } from 'src/lib/state/getters'
 import { MapTileI, TileI } from 'src/types/raid-types/MapLocation'
 import { setMap } from 'src/lib/state/setters'
-import {transpose2dArrays} from 'src/lib/utils'
 
 
 export const isPlayerLocation = (loc: TileI) => {
@@ -15,7 +14,7 @@ const drawMap = (map: MapTileI[][]) => {
   let result = ''
   const {location} = getPlayerInfo()
   map.forEach((row) => {
-    row.reverse().forEach((cell) => {
+    row.forEach((cell) => {
       if (cell.x === location.x && cell.y === location.y) {
         result += '@'
       } else if (cell.enemy) {
@@ -30,7 +29,6 @@ const drawMap = (map: MapTileI[][]) => {
     })
     result += '\n'
   })
-  console.log(map)
   console.log(result)
   return result
 }
@@ -47,8 +45,6 @@ export const updateMap = () => {
   const maxY = Math.max(rowLength, visionMax + location.y + 1)
 
   let newMap = clone(map) as MapTileI[][]
-  console.log('oldMap: ')
-  drawMap(newMap)
 
   for (let rowIdx = 0; rowIdx < maxY; rowIdx++) {
 
